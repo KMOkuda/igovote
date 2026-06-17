@@ -8,6 +8,10 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
+# nginxリバースプロキシ経由のHTTPSをDjangoに正しく伝える（CSRFエラー・無限リダイレクト防止）
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+CSRF_TRUSTED_ORIGINS = ['https://test.igovote.net']
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
