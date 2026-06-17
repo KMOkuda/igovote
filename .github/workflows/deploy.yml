@@ -24,5 +24,5 @@ jobs:
             python manage.py migrate --noinput
             pkill -f "manage.py runserver" || true
             sleep 1
-            nohup python manage.py runserver 0.0.0.0:8000 > /tmp/django.log 2>&1 &
+            setsid nohup python manage.py runserver 0.0.0.0:8000 > /tmp/django.log 2>&1 < /dev/null &
             disown
