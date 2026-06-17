@@ -22,7 +22,10 @@ jobs:
             git pull origin develop
             source .venv/bin/activate
             python manage.py migrate --noinput
-            pkill -f "manage.py runserver" || true
-            sleep 1
+            if [ -f /tmp/django.pid ] && kill -0 "$(cat /tmp/django.pid)" 2>/dev/null; then
+              kill "$(cat /tmp/django.pid)"
+              sleep 1
+            fi
             setsid nohup python manage.py runserver 0.0.0.0:8000 > /tmp/django.log 2>&1 < /dev/null &
+            echo $! > /tmp/django.pid
             disown
