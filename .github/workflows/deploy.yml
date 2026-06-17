@@ -1,0 +1,28 @@
+name: Deploy to test server
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          port: ${{ secrets.DEPLOY_PORT }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script: |
+            cd /opt/myapp
+            git checkout develop
+            git pull origin develop
+            source .venv/bin/activate
+            python manage.py migrate --noinput
+            pkill -f "manage.py runserver" || true
+            sleep 1
+            nohup python manage.py runserver 0.0.0.0:8000 > /tmp/django.log 2>&1 &
+            disown
