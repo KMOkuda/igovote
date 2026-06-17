@@ -1,0 +1,64 @@
+{% extends 'kifu_app/base.html' %}
+{% load static %}
+
+{% block title %}ホーム | 囲碁SNS{% endblock %}
+{% block nav_home %}nav-active{% endblock %}
+
+{% block app_content %}
+<div class="header">
+  <div class="header-center">
+    <div class="title-main">囲碁SNS</div>
+  </div>
+  <div class="header-right">
+    {% if user.is_authenticated %}
+    <div class="header-icon" onclick="location.href='{% url 'kifu_app:logout' %}'">
+      <i class="fa-solid fa-right-from-bracket"></i>
+    </div>
+    {% else %}
+    <div class="header-icon" onclick="location.href='{% url 'kifu_app:login' %}'">
+      <i class="fa-solid fa-right-to-bracket"></i>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<div class="bottom" style="background:#fff; color:#000; flex:1; overflow-y:auto; padding-bottom:80px;">
+  {% if kifus %}
+    {% for kifu in kifus %}
+    <div class="post-card" onclick="location.href='{% url 'kifu_app:kifu_detail' kifu.pk %}'">
+      <div class="goban-mini">
+        <div class="goban-mini-grid"></div>
+      </div>
+      <div class="post-info">
+        <div>
+          <div class="post-header-row">
+            {% if kifu.user.avatar %}
+            <img class="post-avatar" src="{{ kifu.user.avatar.url }}" alt="">
+            {% else %}
+            <div class="post-avatar"></div>
+            {% endif %}
+            <h3 class="post-title">{{ kifu.title }}</h3>
+          </div>
+          <div class="tag-list">
+            {% for tag in kifu.tags.all %}
+            <span class="tag-item">#{{ tag.name }}</span>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="post-footer">
+          <span class="post-meta">
+            <i class="fa-solid fa-user" style="font-size:10px;"></i> {{ kifu.user.username }}
+          </span>
+          <span class="post-date"><i class="fa-regular fa-calendar"></i> {{ kifu.created_at|date:"Y.m.d" }}</span>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  {% else %}
+    <div style="text-align:center; padding:60px 20px; color:#999;">
+      <i class="fa-solid fa-circle-info" style="font-size:32px; margin-bottom:12px; display:block;"></i>
+      まだ棋譜がありません
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

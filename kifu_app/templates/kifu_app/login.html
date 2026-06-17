@@ -1,0 +1,44 @@
+{% extends 'kifu_app/base.html' %}
+
+{% block title %}ログイン | 囲碁SNS{% endblock %}
+
+{% block nav %}{% endblock %}
+
+{% block app_content %}
+<div class="header">
+  <div class="header-left">
+    <div class="back" onclick="history.back()"><i class="fa-solid fa-angle-left"></i></div>
+  </div>
+  <div class="header-center">
+    <div class="title-main">ログイン</div>
+  </div>
+</div>
+
+<div class="bottom" style="background:#fff;color:#000;flex:1;overflow-y:auto;padding:32px 24px;">
+  {% if messages %}
+  {% for message in messages %}
+  <div style="background:#fee;color:#c00;padding:10px 14px;border-radius:8px;margin-bottom:16px;font-size:13px;">
+    {{ message }}
+  </div>
+  {% endfor %}
+  {% endif %}
+
+  <form method="post">
+    {% csrf_token %}
+    <div class="form-group">
+      <label class="form-label">ユーザー名</label>
+      <input type="text" name="username" class="form-input" autofocus required>
+    </div>
+    <div class="form-group">
+      <label class="form-label">パスワード</label>
+      <input type="password" name="password" class="form-input" required>
+    </div>
+    <button type="submit" class="send-btn submit-btn">ログイン</button>
+  </form>
+
+  <div style="text-align:center;margin-top:24px;font-size:13px;color:#666;">
+    アカウントをお持ちでない方は
+    <a href="{% url 'kifu_app:register' %}" style="color:#000;font-weight:bold;">新規登録</a>
+  </div>
+</div>
+{% endblock %}

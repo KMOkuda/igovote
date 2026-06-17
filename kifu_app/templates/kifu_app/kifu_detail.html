@@ -1,0 +1,248 @@
+{% extends 'kifu_app/base.html' %}
+{% load static %}
+
+{% block title %}{{ kifu.title }} | 囲碁SNS{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'kifu_app/css/wgo.player.css' %}">
+<style>
+.header-icon { font-size:18px; cursor:pointer; color:#F9F9F9; padding:4px 8px; }
+</style>
+{% endblock %}
+
+{% block app_content %}
+<div class="header" id="header">
+  <div class="header-left">
+    <div class="back" onclick="history.back()"><i class="fa-solid fa-angle-left"></i></div>
+  </div>
+  <div class="header-center">
+    <div class="title-main">{{ kifu.title }}</div>
+  </div>
+  <div class="header-right">
+    <div class="players-info">
+      <div class="player-row">
+        <span class="stone">●</span>
+        <span class="player-name">{{ kifu.black_player|default:"黒" }}</span>
+      </div>
+      <div class="player-row">
+        <span class="stone">○</span>
+        <span class="player-name">{{ kifu.white_player|default:"白" }}</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="board">
+  <div id="wgo-player" style="width:100%;"></div>
+</div>
+
+<div class="input-area" id="input-area">
+  <i id="close-btn" class="fa-solid fa-xmark" onclick="toggleInput(false)"></i>
+  <div class="comment-area">
+    <textarea id="comment-input" placeholder="検討コメントを入力..."></textarea>
+    <button class="send-btn" id="send-btn">投稿</button>
+  </div>
+</div>
+
+<div class="tabs" id="tabs">
+  <div class="tab active" onclick="switchTab(0)">コメント</div>
+  <div class="tab" onclick="switchTab(1)">棋譜情報</div>
+</div>
+
+<div class="bottom" id="bottom">
+  <div id="comment-area" class="tab-content active">
+    {% if user.is_authenticated %}
+    <div id="comment-list">
+      {% for comment in comments %}
+      <div class="comment" data-move="{{ comment.move_number }}" data-id="{{ comment.pk }}">
+        <div class="avatar">
+          {% if comment.user.avatar %}
+          <img src="{{ comment.user.avatar.url }}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;">
+          {% endif %}
+        </div>
+        <div class="comment-content">
+          <div class="name">{{ comment.user.username }}</div>
+          <div class="text">
+            <span class="move-chip" onclick="goToMove({{ comment.move_number }})">@ {{ comment.move_number }}</span>
+            {{ comment.body }}
+          </div>
+        </div>
+        <div class="like comment-like {% if comment.pk in liked_comment_ids %}liked{% endif %}"
+             data-id="{{ comment.pk }}"
+             onclick="toggleCommentLike(this, {{ comment.pk }})">
+          <i class="fa-{% if comment.pk in liked_comment_ids %}solid{% else %}regular{% endif %} fa-heart"></i>
+          <span>{{ comment.like_count }}</span>
+        </div>
+      </div>
+      {% empty %}
+      <div id="no-comment-msg" style="text-align:center;padding:40px 20px;color:#999;font-size:13px;">
+        まだコメントがありません
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div style="text-align:center;padding:40px 20px;color:#999;font-size:13px;">
+      <a href="{% url 'kifu_app:login' %}" style="color:#000;font-weight:bold;">ログイン</a>するとコメントできます
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="tab-content">
+    <div class="info-list">
+      <div class="info-row">
+        <span class="info-label">対局名</span>
+        <span class="info-value">{{ kifu.event_name|default:"-" }}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">黒</span>
+        <span class="info-value">{{ kifu.black_player|default:"-" }}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">白</span>
+        <span class="info-value">{{ kifu.white_player|default:"-" }}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">コミ</span>
+        <span class="info-value">{% if kifu.komi %}{{ kifu.komi }}目{% else %}-{% endif %}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">結果</span>
+        <span class="info-value">{{ kifu.result|default:"-" }}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">投稿者</span>
+        <span class="info-value">{{ kifu.user.username }}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">投稿日</span>
+        <span class="info-value">{{ kifu.created_at|date:"Y年m月d日" }}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">タグ</span>
+        <span class="info-value">
+          {% for tag in kifu.tags.all %}#{{ tag.name }}{% if not forloop.last %} {% endif %}{% empty %}-{% endfor %}
+        </span>
+      </div>
+      {% if user == kifu.user %}
+      <div style="padding:20px 0;">
+        <button onclick="toggleVisibility()" class="send-btn" style="width:100%;margin-bottom:10px;">
+          公開範囲: {% if kifu.visibility == 'public' %}公開中{% else %}非公開{% endif %}
+        </button>
+        <button onclick="deleteKifu()" class="send-btn" style="width:100%;background:#e53e3e;">
+          この棋譜を削除
+        </button>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block nav %}
+{% if user.is_authenticated %}
+<div class="fab-message" id="fab-message" onclick="toggleInput(true)">
+  <i class="fa-solid fa-message"></i>
+</div>
+{% endif %}
+{{ block.super }}
+{% endblock %}
+
+{% block extra_js %}
+{{ kifu.sgf_data|default:""|json_script:"sgf-data" }}
+<script>
+const KIFU_ID = {{ kifu.pk }};
+const IS_AUTH = {{ user.is_authenticated|yesno:"true,false" }};
+const SGF_DATA = JSON.parse(document.getElementById('sgf-data').textContent);
+</script>
+<script src="{% static 'kifu_app/js/wgo.min.js' %}"></script>
+<script src="{% static 'kifu_app/js/wgo.player.min.js' %}"></script>
+<script src="{% static 'kifu_app/js/script.js' %}"></script>
+<script>
+// いいね（コメント）
+function toggleCommentLike(el, commentId) {
+  if (!IS_AUTH) { location.href = '{% url "kifu_app:login" %}'; return; }
+  fetch(`/api/comment/${commentId}/like/`, {
+    method: 'POST',
+    headers: {'X-CSRFToken': getCookie('csrftoken')},
+  })
+  .then(r => r.json())
+  .then(data => {
+    const icon = el.querySelector('i');
+    const count = el.querySelector('span');
+    icon.className = data.liked ? 'fa-solid fa-heart' : 'fa-regular fa-heart';
+    count.textContent = data.like_count;
+    el.classList.toggle('liked', data.liked);
+  });
+}
+
+// 公開範囲切替
+function toggleVisibility() {
+  const current = '{{ kifu.visibility }}';
+  const next = current === 'public' ? 'private' : 'public';
+  if (!confirm(`「${next === 'public' ? '公開' : '非公開'}」に変更しますか？`)) return;
+  fetch(`/kifu/{{ kifu.pk }}/visibility/`, {
+    method: 'POST',
+    headers: {'X-CSRFToken': getCookie('csrftoken'), 'Content-Type': 'application/x-www-form-urlencoded'},
+    body: `visibility=${next}`,
+  })
+  .then(r => r.json())
+  .then(data => { location.reload(); });
+}
+
+// 削除
+function deleteKifu() {
+  if (!confirm('この棋譜を削除しますか？この操作は取り消せません。')) return;
+  fetch(`/kifu/{{ kifu.pk }}/delete/`, {
+    method: 'POST',
+    headers: {'X-CSRFToken': getCookie('csrftoken')},
+  })
+  .then(() => { location.href = '/mypage/'; });
+}
+
+// コメント投稿
+document.getElementById('send-btn')?.addEventListener('click', function() {
+  const input = document.getElementById('comment-input');
+  const text = input.value;
+  const match = text.match(/^@ (\d+) /);
+  const moveNum = match ? parseInt(match[1]) : 0;
+  const body = match ? text.replace(/^@ \d+ /, '').trim() : text.trim();
+  if (!body) return;
+
+  fetch(`/api/kifu/${KIFU_ID}/comment/`, {
+    method: 'POST',
+    headers: {'X-CSRFToken': getCookie('csrftoken'), 'Content-Type': 'application/json'},
+    body: JSON.stringify({body: body, move_number: moveNum}),
+  })
+  .then(r => r.json())
+  .then(data => {
+    // no-commentメッセージを消す
+    document.getElementById('no-comment-msg')?.remove();
+    // コメントを追加
+    const list = document.getElementById('comment-list');
+    const div = document.createElement('div');
+    div.className = 'comment';
+    div.dataset.move = data.move_number;
+    div.dataset.id = data.id;
+    div.innerHTML = `
+      <div class="avatar"></div>
+      <div class="comment-content">
+        <div class="name">${data.user}</div>
+        <div class="text">
+          <span class="move-chip" onclick="goToMove(${data.move_number})">@ ${data.move_number}</span>
+          ${data.body}
+        </div>
+      </div>
+      <div class="like" data-id="${data.id}" onclick="toggleCommentLike(this, ${data.id})">
+        <i class="fa-regular fa-heart"></i><span>0</span>
+      </div>`;
+    list.appendChild(div);
+    input.value = '';
+    toggleInput(false);
+  });
+});
+
+function getCookie(name) {
+  const v = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
+  return v ? v[2] : null;
+}
+</script>
+{% endblock %}

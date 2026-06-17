@@ -1,0 +1,40 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}囲碁SNS{% endblock %}</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  {% block extra_css %}{% endblock %}
+  <link rel="stylesheet" href="{% static 'kifu_app/css/style.css' %}">
+</head>
+<body>
+  <div class="app">
+    {% block app_content %}{% endblock %}
+  </div>
+
+  {% block nav %}
+  <nav class="nav" id="nav">
+    <div class="nav-item {% block nav_home %}{% endblock %}" onclick="location.href='{% url 'kifu_app:top' %}'">
+      <i class="fa-solid fa-house"></i>
+      <span>ホーム</span>
+    </div>
+    <div class="nav-item {% block nav_search %}{% endblock %}" onclick="location.href='{% url 'kifu_app:search' %}'">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <span>検索</span>
+    </div>
+    <div class="nav-item {% block nav_post %}{% endblock %}" onclick="location.href='{% url 'kifu_app:kifu_create' %}'">
+      <i class="fa-solid fa-square-plus"></i>
+      <span>投稿</span>
+    </div>
+    <div class="nav-item {% block nav_mypage %}{% endblock %}" onclick="location.href='{% url 'kifu_app:mypage' %}'">
+      <i class="fa-solid fa-user"></i>
+      <span>マイページ</span>
+    </div>
+  </nav>
+  {% endblock %}
+
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

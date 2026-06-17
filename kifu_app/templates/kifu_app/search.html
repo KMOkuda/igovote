@@ -1,0 +1,71 @@
+{% extends 'kifu_app/base.html' %}
+{% load static %}
+
+{% block title %}検索 | 囲碁SNS{% endblock %}
+{% block nav_search %}nav-active{% endblock %}
+
+{% block app_content %}
+<div class="header search-header">
+  <div class="header-search-title">
+    {% if query %}「{{ query }}」の検索結果{% else %}棋譜検索{% endif %}
+  </div>
+  <div class="search-bar-wrapper">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <input type="text" class="search-input" id="search-input"
+           value="{{ query }}" placeholder="タイトル・タグ・対局者名で検索...">
+  </div>
+</div>
+
+<div class="bottom search-results">
+  {% if kifus %}
+    {% for kifu in kifus %}
+    <div class="post-card" onclick="location.href='{% url 'kifu_app:kifu_detail' kifu.pk %}'">
+      <div class="goban-mini"></div>
+      <div class="post-info">
+        <div>
+          <div class="post-header-row">
+            {% if kifu.user.avatar %}
+            <img class="post-avatar" src="{{ kifu.user.avatar.url }}" alt="">
+            {% else %}
+            <div class="post-avatar"></div>
+            {% endif %}
+            <h3 class="post-title">{{ kifu.title }}</h3>
+          </div>
+          <div class="tag-list">
+            {% for tag in kifu.tags.all %}
+            <span class="tag-item">#{{ tag.name }}</span>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="post-footer">
+          <span class="post-meta">
+            <i class="fa-solid fa-user" style="font-size:10px;"></i> {{ kifu.user.username }}
+          </span>
+          <span class="post-date"><i class="fa-regular fa-calendar"></i> {{ kifu.created_at|date:"Y.m.d" }}</span>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  {% elif query %}
+    <div style="text-align:center;padding:60px 20px;color:#999;">
+      <i class="fa-solid fa-circle-info" style="font-size:32px;margin-bottom:12px;display:block;"></i>
+      「{{ query }}」に一致する棋譜がありません
+    </div>
+  {% else %}
+    <div style="text-align:center;padding:60px 20px;color:#999;">
+      <i class="fa-solid fa-magnifying-glass" style="font-size:32px;margin-bottom:12px;display:block;"></i>
+      キーワードを入力してください
+    </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('search-input').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') {
+    location.href = '/search/?q=' + encodeURIComponent(this.value.trim());
+  }
+});
+</script>
+{% endblock %}
