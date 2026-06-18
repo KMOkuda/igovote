@@ -16,6 +16,7 @@ body {
   -webkit-touch-callout: none; /* 長押しメニュー（辞書/コピー等）を無効化 */
   -webkit-user-select: none;
   user-select: none;
+  -webkit-tap-highlight-color: transparent; /* タップ時の青いハイライトを無効化 */
 }
 
 /* 入力欄では通常通りテキスト選択・コピーを可能にする */
