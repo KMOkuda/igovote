@@ -76,7 +76,9 @@ def search(request):
         )
 
     popular_tags = (
-        Tag.objects.annotate(num_kifus=Count('kifu'))
+        Tag.objects.annotate(
+            num_kifus=Count('kifu', filter=Q(kifu__visibility='public'))
+        )
         .filter(num_kifus__gt=0)
         .order_by('-num_kifus')[:10]
     )
