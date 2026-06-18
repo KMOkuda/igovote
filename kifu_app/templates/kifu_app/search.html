@@ -13,15 +13,15 @@
   <div class="header-right"></div>
 </div>
 
-<div class="search-bar-section">
-  <div class="search-bar-wrapper">
-    <i class="fa-solid fa-magnifying-glass"></i>
-    <input type="text" class="search-input" id="search-input"
-           value="{{ query }}" placeholder="タイトル・タグ・対局者名で検索...">
-  </div>
-</div>
-
 <div class="bottom search-results">
+  <div class="search-bar-section">
+    <div class="search-bar-wrapper">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <input type="text" class="search-input" id="search-input"
+             value="{{ query }}" placeholder="タイトル・タグ・対局者名で検索...">
+    </div>
+  </div>
+
   {% if kifus %}
     {% for kifu in kifus %}
     <div class="post-card" onclick="location.href='{% url 'kifu_app:kifu_detail' kifu.pk %}'">
