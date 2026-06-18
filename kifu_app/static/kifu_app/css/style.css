@@ -13,6 +13,16 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   background: #000;
   color: #F9F9F9;
+  -webkit-touch-callout: none; /* 長押しメニュー（辞書/コピー等）を無効化 */
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* 入力欄では通常通りテキスト選択・コピーを可能にする */
+input,
+textarea {
+  -webkit-user-select: text;
+  user-select: text;
 }
 
 .app {

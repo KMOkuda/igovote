@@ -146,6 +146,17 @@ def mypage(request):
     return render(request, 'kifu_app/mypage.html', {'kifus': kifus})
 
 
+@login_required
+@require_POST
+def update_avatar(request):
+    """アバター画像の更新"""
+    avatar = request.FILES.get('avatar')
+    if avatar:
+        request.user.avatar = avatar
+        request.user.save(update_fields=['avatar'])
+    return redirect('kifu_app:mypage')
+
+
 # ------------------------------------------------------------------ #
 # API（Ajax）
 # ------------------------------------------------------------------ #
