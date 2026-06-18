@@ -5,10 +5,15 @@
 {% block nav_search %}nav-active{% endblock %}
 
 {% block app_content %}
-<div class="header search-header">
-  <div class="header-search-title">
-    {% if query %}「{{ query }}」の検索結果{% else %}棋譜検索{% endif %}
+<div class="header">
+  <div class="header-left"></div>
+  <div class="header-center">
+    <div class="title-main">検索</div>
   </div>
+  <div class="header-right"></div>
+</div>
+
+<div class="search-bar-section">
   <div class="search-bar-wrapper">
     <i class="fa-solid fa-magnifying-glass"></i>
     <input type="text" class="search-input" id="search-input"

@@ -517,19 +517,10 @@ button.wgo-button {
   padding: 4px 8px;
 }
 
-/* 検索画面ヘッダー */
-.header.search-header {
-  flex-direction: column;
-  align-items: stretch;
-  gap: 12px;
-  padding: 12px;
-  height: auto;
-}
-.header-search-title {
-  text-align: center;
-  font-size: 16px;
-  font-weight: bold;
-  color: #F9F9F9;
+/* 検索バー（ヘッダー直下） */
+.search-bar-section {
+  padding: 0 12px 12px;
+  flex-shrink: 0;
 }
 .search-bar-wrapper {
   position: relative;
