@@ -26,6 +26,11 @@ SECRET_KEY = 'django-insecure-+fy@#4y2d!yk-jsp_he%pa@k^puftrzwxg!r*$&%__mhn375oc
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
+
+# nginxリバースプロキシ経由のHTTPSをDjangoに正しく伝える（CSRFエラー・無限リダイレクト防止）
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+CSRF_TRUSTED_ORIGINS = ['https://test.igovote.net']
+
 # Application definition
 
 INSTALLED_APPS = [
