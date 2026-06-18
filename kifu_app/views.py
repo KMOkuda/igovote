@@ -3,7 +3,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
-from django.db.models import Q
+from django.db.models import Q, Count
 
 from .models import Kifu, Comment, Tag, KifuLike, CommentLike
 
@@ -55,26 +55,36 @@ def kifu_detail(request, kifu_id):
 
 
 def search(request):
-    """棋譜検索"""
+    """棋譜検索（「#タグ名」はタグ検索、それ以外はキーワード検索。すべてAND条件）"""
     query = request.GET.get('q', '').strip()
-    tag_names = [t.strip() for t in query.split(',') if t.strip()]
+    tokens = query.split()
+    tag_names = [t[1:] for t in tokens if t.startswith('#') and len(t) > 1]
+    keywords = [t for t in tokens if not t.startswith('#')]
 
     kifus = Kifu.objects.filter(visibility='public').select_related('user').prefetch_related('tags')
 
+    for tag_name in tag_names:
+        kifus = kifus.filter(tags__name__icontains=tag_name)
     if tag_names:
-        for tag_name in tag_names:
-            kifus = kifus.filter(tags__name__icontains=tag_name)
         kifus = kifus.distinct()
-    elif query:
+
+    for word in keywords:
         kifus = kifus.filter(
-            Q(title__icontains=query) |
-            Q(black_player__icontains=query) |
-            Q(white_player__icontains=query)
+            Q(title__icontains=word) |
+            Q(black_player__icontains=word) |
+            Q(white_player__icontains=word)
         )
+
+    popular_tags = (
+        Tag.objects.annotate(num_kifus=Count('kifu'))
+        .filter(num_kifus__gt=0)
+        .order_by('-num_kifus')[:10]
+    )
 
     return render(request, 'kifu_app/search.html', {
         'kifus': kifus[:50],
         'query': query,
+        'popular_tags': popular_tags,
     })
 
 

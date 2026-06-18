@@ -20,6 +20,13 @@
       <input type="text" class="search-input" id="search-input"
              value="{{ query }}" placeholder="タイトル・タグ・対局者名で検索...">
     </div>
+    {% if popular_tags %}
+    <div class="tag-suggestions">
+      {% for tag in popular_tags %}
+      <span class="tag-suggestion" onclick="addTagToSearch('{{ tag.name|escapejs }}')">#{{ tag.name }}</span>
+      {% endfor %}
+    </div>
+    {% endif %}
   </div>
 
   {% if kifus %}
@@ -72,5 +79,14 @@ document.getElementById('search-input').addEventListener('keydown', function(e) 
     location.href = '/search/?q=' + encodeURIComponent(this.value.trim());
   }
 });
+
+function addTagToSearch(tagName) {
+  const input = document.getElementById('search-input');
+  const token = '#' + tagName;
+  const tokens = input.value.trim().split(/\s+/).filter(Boolean);
+  if (tokens.includes(token)) return;
+  tokens.push(token);
+  location.href = '/search/?q=' + encodeURIComponent(tokens.join(' '));
+}
 </script>
 {% endblock %}
