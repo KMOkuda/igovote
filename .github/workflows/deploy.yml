@@ -21,6 +21,7 @@ jobs:
             git checkout develop
             git pull origin develop
             source .venv/bin/activate
+            pip install -q python-dotenv
             python manage.py migrate --noinput
             if [ -f /tmp/django.pid ] && kill -0 "$(cat /tmp/django.pid)" 2>/dev/null; then
               kill "$(cat /tmp/django.pid)"

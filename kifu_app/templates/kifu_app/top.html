@@ -24,6 +24,16 @@
 </div>
 
 <div class="bottom" style="background:#fff; color:#000; flex:1; overflow-y:auto; padding-bottom:80px;">
+  {% if messages %}
+  <div style="padding:16px 16px 0;">
+    {% for message in messages %}
+    <div style="background:{% if message.tags == 'success' %}#e6f4ea{% else %}#fee{% endif %};color:{% if message.tags == 'success' %}#1a7f37{% else %}#c00{% endif %};padding:10px 14px;border-radius:8px;margin-bottom:16px;font-size:13px;">
+      {{ message }}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
   {% if kifus %}
     {% for kifu in kifus %}
     {{ kifu.sgf_data|json_script:forloop.counter }}

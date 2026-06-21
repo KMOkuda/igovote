@@ -10,10 +10,14 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
+import os
 from pathlib import Path
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+load_dotenv(BASE_DIR / '.env')
 
 
 # Quick-start development settings - unsuitable for production
@@ -141,3 +145,20 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # 日本語・タイムゾーン
 LANGUAGE_CODE = 'ja'
 TIME_ZONE = 'Asia/Tokyo'
+
+# メール送信（Amazon SES）
+# .envにSES_SMTP_USER/SES_SMTP_PASSWORDが無い場合は、コンソールに出力するだけのバックエンドを使う
+SES_SMTP_USER = os.environ.get('SES_SMTP_USER', '')
+SES_SMTP_PASSWORD = os.environ.get('SES_SMTP_PASSWORD', '')
+
+if SES_SMTP_USER:
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_HOST = 'email-smtp.ap-northeast-1.amazonaws.com'
+    EMAIL_PORT = 587
+    EMAIL_USE_TLS = True
+    EMAIL_HOST_USER = SES_SMTP_USER
+    EMAIL_HOST_PASSWORD = SES_SMTP_PASSWORD
+else:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+DEFAULT_FROM_EMAIL = 'noreply@test.igovote.net'

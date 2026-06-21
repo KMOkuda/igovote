@@ -18,7 +18,7 @@
 <div class="bottom" style="background:#fff;color:#000;flex:1;overflow-y:auto;padding:32px 24px;">
   {% if messages %}
   {% for message in messages %}
-  <div style="background:#fee;color:#c00;padding:10px 14px;border-radius:8px;margin-bottom:16px;font-size:13px;">
+  <div style="background:{% if message.tags == 'success' %}#e6f4ea{% else %}#fee{% endif %};color:{% if message.tags == 'success' %}#1a7f37{% else %}#c00{% endif %};padding:10px 14px;border-radius:8px;margin-bottom:16px;font-size:13px;">
     {{ message }}
   </div>
   {% endfor %}
