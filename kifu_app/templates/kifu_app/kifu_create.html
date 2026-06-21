@@ -40,9 +40,7 @@
         <div class="input-tab" id="tab-btn-paste" onclick="switchInputTab(1)">SGFを貼り付け</div>
       </div>
 
-      <div id="input-tab-board" class="input-tab-content active">
-        <p style="font-size:11px;color:#999;">※ 置き碁（ハンディキャップ設定）には対応していません。置き碁を作る場合は「SGFを貼り付け」を使ってください。</p>
-      </div>
+      <div id="input-tab-board" class="input-tab-content active"></div>
 
       <div id="input-tab-paste" class="input-tab-content">
         <textarea id="sgf-textarea" class="form-input form-textarea" placeholder="(;GM[1]FF[4]..."></textarea>
@@ -73,6 +71,8 @@
           <button type="button" id="board-next" class="preview-nav-btn"><i class="fa-solid fa-angle-right"></i></button>
         </div>
         <button type="button" id="set-highlight-btn" class="set-highlight-btn">この局面をハイライトに設定</button>
+
+        <p id="handicap-note" style="display:none;font-size:11px;color:#999;margin-top:8px;">※ 置き碁（ハンディキャップ設定）には対応していません。置き碁を作る場合は「SGFを貼り付け」を使ってください。</p>
 
         <div id="highlight-status" style="display:none;font-size:12px;color:#1a7f37;margin-top:6px;">
           <i class="fa-solid fa-check"></i> <span id="highlight-status-num"></span>手目をハイライトに設定中
@@ -237,7 +237,8 @@ function onSharedBoardClick(x, y) {
 function setEditMode(editable) {
   document.getElementById('edit-controls').style.display = editable ? 'flex' : 'none';
   document.getElementById('view-controls').style.display = editable ? 'none' : 'flex';
-  document.getElementById('board-section-label').textContent = editable ? '盤面に着手' : 'ハイライト局面';
+  document.getElementById('board-section-label').textContent = editable ? '' : 'ハイライト局面';
+  document.getElementById('handicap-note').style.display = editable ? 'block' : 'none';
   document.getElementById('highlight-status').style.display = 'none';
   if (editable) updateTurnLabel(); else updateMoveLabel();
 }
