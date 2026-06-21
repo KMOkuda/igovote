@@ -127,6 +127,7 @@
 
 {% block extra_js %}
 <script src="{% static 'kifu_app/js/wgo.min.js' %}"></script>
+<script src="{% static 'kifu_app/js/wgo.player.min.js' %}"></script>
 <script>
 document.getElementById('create-form').addEventListener('submit', function(e) {
   if (!document.getElementById('sgf-data-hidden').value.trim()) {
