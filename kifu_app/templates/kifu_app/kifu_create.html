@@ -61,14 +61,13 @@
           <button type="button" id="undo-move-btn" class="preview-nav-btn" title="一手戻す"><i class="fa-solid fa-rotate-left"></i></button>
           <button type="button" id="clear-board-btn" class="preview-nav-btn" title="クリア"><i class="fa-solid fa-trash"></i></button>
         </div>
-        <button type="button" id="save-kifu-btn" class="set-highlight-btn" style="display:none;">棋譜を保存</button>
 
         <div id="view-controls" class="preview-controls" style="display:none;">
           <button type="button" id="board-prev" class="preview-nav-btn"><i class="fa-solid fa-angle-left"></i></button>
           <span id="board-move-num">0手目</span>
           <button type="button" id="board-next" class="preview-nav-btn"><i class="fa-solid fa-angle-right"></i></button>
         </div>
-        <button type="button" id="set-highlight-btn" class="set-highlight-btn" style="display:none;">この局面をハイライトに設定</button>
+        <button type="button" id="set-highlight-btn" class="set-highlight-btn">この局面をハイライトに設定</button>
 
         <div id="highlight-status" style="display:none;font-size:12px;color:#1a7f37;margin-top:6px;">
           <i class="fa-solid fa-check"></i> <span id="highlight-status-num"></span>手目をハイライトに設定中
@@ -186,6 +185,9 @@ function boardPixelSize() {
 }
 
 function buildSharedBoard(sgf, editable) {
+  // 先に表示してから幅を計測する（非表示のままだとclientWidthが0になり盤面が小さくなるため）
+  document.getElementById('board-section').style.display = 'block';
+
   const container = document.getElementById('shared-board');
   container.innerHTML = '';
 
@@ -205,7 +207,6 @@ function buildSharedBoard(sgf, editable) {
 
   sharedPlayer = player;
   container.appendChild(player.element);
-  document.getElementById('board-section').style.display = 'block';
 
   if (editable) {
     player.board.addEventListener('click', onSharedBoardClick);
@@ -225,9 +226,7 @@ function onSharedBoardClick(x, y) {
 
 function setEditMode(editable) {
   document.getElementById('edit-controls').style.display = editable ? 'flex' : 'none';
-  document.getElementById('save-kifu-btn').style.display = editable ? 'inline-block' : 'none';
   document.getElementById('view-controls').style.display = editable ? 'none' : 'flex';
-  document.getElementById('set-highlight-btn').style.display = editable ? 'none' : 'inline-block';
   document.getElementById('board-section-label').textContent = editable ? '盤面に着手' : 'ハイライト局面';
   document.getElementById('highlight-status').style.display = 'none';
   if (editable) updateTurnLabel(); else updateMoveLabel();
@@ -245,13 +244,6 @@ function updateMoveLabel() {
 function syncSharedBoardToForm() {
   document.getElementById('sgf-data-hidden').value = sharedPlayer.kifu.toSgf();
 }
-
-document.getElementById('save-kifu-btn').addEventListener('click', function() {
-  if (!sharedPlayer) return;
-  sharedPlayer.board.removeEventListener('click', onSharedBoardClick);
-  syncSharedBoardToForm();
-  setEditMode(false);
-});
 
 document.getElementById('undo-move-btn').addEventListener('click', function() {
   if (!sharedPlayer || !sharedPlayer.kifuReader.node.parent) return;
