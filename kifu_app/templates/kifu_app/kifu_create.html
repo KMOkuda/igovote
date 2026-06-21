@@ -45,28 +45,31 @@
       </div>
 
       <div id="input-tab-board" class="input-tab-content">
-        <div id="create-board" class="preview-board"></div>
-        <div class="create-board-controls">
-          <span id="create-board-turn">黒番</span>
-          <button type="button" id="undo-move-btn" class="preview-nav-btn" title="一手戻す"><i class="fa-solid fa-rotate-left"></i></button>
-          <button type="button" id="clear-board-btn" class="preview-nav-btn" title="クリア"><i class="fa-solid fa-trash"></i></button>
-        </div>
-        <p style="font-size:11px;color:#999;margin-top:8px;">※ 置き碁（ハンディキャップ設定）には対応していません。置き碁を作る場合は「SGFを貼り付け」を使ってください。</p>
+        <p style="font-size:11px;color:#999;">※ 置き碁（ハンディキャップ設定）には対応していません。置き碁を作る場合は「SGFを貼り付け」を使ってください。</p>
       </div>
 
       <input type="hidden" name="sgf_data" id="sgf-data-hidden">
     </div>
 
-    <div class="form-group" id="highlight-section" style="display:none;">
-      <label class="form-label">ハイライト局面</label>
+    <div class="form-group" id="board-section" style="display:none;">
+      <label class="form-label" id="board-section-label">盤面</label>
       <div class="highlight-preview">
-        <div id="preview-board" class="preview-board"></div>
-        <div class="preview-controls">
-          <button type="button" id="preview-prev" class="preview-nav-btn"><i class="fa-solid fa-angle-left"></i></button>
-          <span id="preview-move-num">0手目</span>
-          <button type="button" id="preview-next" class="preview-nav-btn"><i class="fa-solid fa-angle-right"></i></button>
+        <div id="shared-board" class="preview-board"></div>
+
+        <div id="edit-controls" class="create-board-controls" style="display:none;">
+          <span id="board-turn-label">黒番</span>
+          <button type="button" id="undo-move-btn" class="preview-nav-btn" title="一手戻す"><i class="fa-solid fa-rotate-left"></i></button>
+          <button type="button" id="clear-board-btn" class="preview-nav-btn" title="クリア"><i class="fa-solid fa-trash"></i></button>
         </div>
-        <button type="button" id="set-highlight-btn" class="set-highlight-btn">この局面をハイライトに設定</button>
+        <button type="button" id="save-kifu-btn" class="set-highlight-btn" style="display:none;">棋譜を保存</button>
+
+        <div id="view-controls" class="preview-controls" style="display:none;">
+          <button type="button" id="board-prev" class="preview-nav-btn"><i class="fa-solid fa-angle-left"></i></button>
+          <span id="board-move-num">0手目</span>
+          <button type="button" id="board-next" class="preview-nav-btn"><i class="fa-solid fa-angle-right"></i></button>
+        </div>
+        <button type="button" id="set-highlight-btn" class="set-highlight-btn" style="display:none;">この局面をハイライトに設定</button>
+
         <div id="highlight-status" style="display:none;font-size:12px;color:#1a7f37;margin-top:6px;">
           <i class="fa-solid fa-check"></i> <span id="highlight-status-num"></span>手目をハイライトに設定中
         </div>
@@ -136,21 +139,6 @@ document.getElementById('create-form').addEventListener('submit', function(e) {
   }
 });
 
-// タブ切り替え（SGF貼り付け / 盤面に着手）
-function switchInputTab(index) {
-  document.getElementById('tab-btn-paste').classList.toggle('active', index === 0);
-  document.getElementById('tab-btn-board').classList.toggle('active', index === 1);
-  document.getElementById('input-tab-paste').classList.toggle('active', index === 0);
-  document.getElementById('input-tab-board').classList.toggle('active', index === 1);
-  document.getElementById('sgf-data-hidden').value = index === 0
-    ? document.getElementById('sgf-textarea').value
-    : (createPlayer ? createPlayer.kifu.toSgf() : '');
-
-  if (index === 1 && !createPlayer) {
-    initCreateBoard();
-  }
-}
-
 // SGF自動パース（タイトル・対局者を補完）
 document.getElementById('sgf-textarea').addEventListener('input', function() {
   document.getElementById('sgf-data-hidden').value = this.value;
@@ -180,110 +168,152 @@ document.getElementById('sgf-textarea').addEventListener('blur', function() {
     document.querySelector('[name="komi"]').value = get('KM');
   }
 
-  updateHighlightPreview(sgf);
+  if (sgf.trim()) {
+    buildSharedBoard(sgf, false);
+  } else {
+    document.getElementById('board-section').style.display = 'none';
+    sharedPlayer = null;
+  }
 });
 
-// 盤面に着手して棋譜を作成
-let createPlayer = null;
+// 盤面（作成・ハイライト共通）
+let sharedPlayer = null;
+let currentTabIndex = 0;
 
-function initCreateBoard() {
-  const container = document.getElementById('create-board');
+function boardPixelSize() {
+  const wrapper = document.querySelector('.highlight-preview');
+  return Math.max(200, Math.min(wrapper.clientWidth, 360));
+}
+
+function buildSharedBoard(sgf, editable) {
+  const container = document.getElementById('shared-board');
   container.innerHTML = '';
 
-  createPlayer = new WGo.Player({
-    sgf: "(;GM[1]FF[4]SZ[19])",
-    move: 0,
-    board: { stoneHandler: WGo.Board.drawHandlers.NORMAL, width: 260, height: 260 },
-  });
-  container.appendChild(createPlayer.element);
+  let player;
+  try {
+    const size = boardPixelSize();
+    player = new WGo.Player({
+      sgf: sgf,
+      move: 0,
+      board: { stoneHandler: WGo.Board.drawHandlers.NORMAL, width: size, height: size },
+    });
+  } catch (e) {
+    document.getElementById('board-section').style.display = 'none';
+    sharedPlayer = null;
+    return;
+  }
 
-  createPlayer.board.addEventListener("click", function(x, y) {
-    if (!createPlayer.kifuReader.game.isValid(x, y)) return;
-    createPlayer.kifuReader.node.appendChild(new WGo.KNode({
-      move: { x: x, y: y, c: createPlayer.kifuReader.game.turn },
-    }));
-    createPlayer.next(createPlayer.kifuReader.node.children.length - 1);
-    syncCreateBoardToForm();
-  });
+  sharedPlayer = player;
+  container.appendChild(player.element);
+  document.getElementById('board-section').style.display = 'block';
 
-  updateCreateBoardTurnLabel();
+  if (editable) {
+    player.board.addEventListener('click', onSharedBoardClick);
+  }
+  setEditMode(editable);
 }
 
-function updateCreateBoardTurnLabel() {
-  document.getElementById('create-board-turn').textContent =
-    createPlayer.kifuReader.game.turn === WGo.B ? '黒番' : '白番';
+function onSharedBoardClick(x, y) {
+  if (!sharedPlayer.kifuReader.game.isValid(x, y)) return;
+  sharedPlayer.kifuReader.node.appendChild(new WGo.KNode({
+    move: { x: x, y: y, c: sharedPlayer.kifuReader.game.turn },
+  }));
+  sharedPlayer.next(sharedPlayer.kifuReader.node.children.length - 1);
+  syncSharedBoardToForm();
+  updateTurnLabel();
 }
 
-function syncCreateBoardToForm() {
-  const sgf = createPlayer.kifu.toSgf();
-  document.getElementById('sgf-data-hidden').value = sgf;
-  updateCreateBoardTurnLabel();
-  updateHighlightPreview(sgf);
+function setEditMode(editable) {
+  document.getElementById('edit-controls').style.display = editable ? 'flex' : 'none';
+  document.getElementById('save-kifu-btn').style.display = editable ? 'inline-block' : 'none';
+  document.getElementById('view-controls').style.display = editable ? 'none' : 'flex';
+  document.getElementById('set-highlight-btn').style.display = editable ? 'none' : 'inline-block';
+  document.getElementById('board-section-label').textContent = editable ? '盤面に着手' : 'ハイライト局面';
+  document.getElementById('highlight-status').style.display = 'none';
+  if (editable) updateTurnLabel(); else updateMoveLabel();
 }
+
+function updateTurnLabel() {
+  document.getElementById('board-turn-label').textContent =
+    sharedPlayer.kifuReader.game.turn === WGo.B ? '黒番' : '白番';
+}
+
+function updateMoveLabel() {
+  document.getElementById('board-move-num').textContent = sharedPlayer.kifuReader.path.m + '手目';
+}
+
+function syncSharedBoardToForm() {
+  document.getElementById('sgf-data-hidden').value = sharedPlayer.kifu.toSgf();
+}
+
+document.getElementById('save-kifu-btn').addEventListener('click', function() {
+  if (!sharedPlayer) return;
+  sharedPlayer.board.removeEventListener('click', onSharedBoardClick);
+  syncSharedBoardToForm();
+  setEditMode(false);
+});
 
 document.getElementById('undo-move-btn').addEventListener('click', function() {
-  if (!createPlayer || !createPlayer.kifuReader.node.parent) return;
-  const node = createPlayer.kifuReader.node;
-  createPlayer.previous();
+  if (!sharedPlayer || !sharedPlayer.kifuReader.node.parent) return;
+  const node = sharedPlayer.kifuReader.node;
+  sharedPlayer.previous();
   node.remove();
-  syncCreateBoardToForm();
+  syncSharedBoardToForm();
+  updateTurnLabel();
 });
 
 document.getElementById('clear-board-btn').addEventListener('click', function() {
   if (!confirm('盤面をリセットしますか？')) return;
-  initCreateBoard();
-  syncCreateBoardToForm();
+  buildSharedBoard("(;GM[1]FF[4]SZ[19])", true);
+  syncSharedBoardToForm();
 });
 
-// ハイライト選択プレビュー
-let previewPlayer = null;
-
-function updateHighlightPreview(sgf) {
-  const section = document.getElementById('highlight-section');
-  const container = document.getElementById('preview-board');
-  container.innerHTML = '';
-
-  if (!sgf || !sgf.trim()) {
-    section.style.display = 'none';
-    previewPlayer = null;
-    return;
-  }
-
-  try {
-    previewPlayer = new WGo.Player({
-      sgf: sgf,
-      move: 0,
-      board: { stoneHandler: WGo.Board.drawHandlers.NORMAL, width: 260, height: 260 },
-    });
-  } catch (e) {
-    section.style.display = 'none';
-    previewPlayer = null;
-    return;
-  }
-
-  container.appendChild(previewPlayer.element);
-  section.style.display = 'block';
-  updatePreviewMoveLabel();
-}
-
-function updatePreviewMoveLabel() {
-  if (!previewPlayer) return;
-  document.getElementById('preview-move-num').textContent = previewPlayer.kifuReader.path.m + '手目';
-}
-
-document.getElementById('preview-prev').addEventListener('click', function() {
-  if (previewPlayer) { previewPlayer.previous(); updatePreviewMoveLabel(); }
+document.getElementById('board-prev').addEventListener('click', function() {
+  if (sharedPlayer) { sharedPlayer.previous(); updateMoveLabel(); }
 });
-document.getElementById('preview-next').addEventListener('click', function() {
-  if (previewPlayer) { previewPlayer.next(); updatePreviewMoveLabel(); }
+document.getElementById('board-next').addEventListener('click', function() {
+  if (sharedPlayer) { sharedPlayer.next(); updateMoveLabel(); }
 });
 
 document.getElementById('set-highlight-btn').addEventListener('click', function() {
-  if (!previewPlayer) return;
-  const m = previewPlayer.kifuReader.path.m;
+  if (!sharedPlayer) return;
+  const m = sharedPlayer.kifuReader.path.m;
   document.getElementById('highlight-move-input').value = m;
   document.getElementById('highlight-status').style.display = 'block';
   document.getElementById('highlight-status-num').textContent = m;
 });
+
+// タブ切り替え（SGF貼り付け / 盤面に着手）
+function switchInputTab(index) {
+  if (index === currentTabIndex) return;
+
+  // 盤面に着手タブで編集中（未保存）の場合は確認
+  const editing = document.getElementById('edit-controls').style.display !== 'none';
+  if (currentTabIndex === 1 && editing && sharedPlayer && sharedPlayer.kifuReader.path.m > 0) {
+    if (!confirm('盤面の内容を保存していません。タブを移動すると内容は失われます。よろしいですか？')) {
+      return;
+    }
+  }
+
+  currentTabIndex = index;
+  document.getElementById('tab-btn-paste').classList.toggle('active', index === 0);
+  document.getElementById('tab-btn-board').classList.toggle('active', index === 1);
+  document.getElementById('input-tab-paste').classList.toggle('active', index === 0);
+  document.getElementById('input-tab-board').classList.toggle('active', index === 1);
+
+  if (index === 0) {
+    const sgf = document.getElementById('sgf-textarea').value;
+    document.getElementById('sgf-data-hidden').value = sgf;
+    if (sgf.trim()) {
+      buildSharedBoard(sgf, false);
+    } else {
+      document.getElementById('board-section').style.display = 'none';
+      sharedPlayer = null;
+    }
+  } else {
+    buildSharedBoard("(;GM[1]FF[4]SZ[19])", true);
+    document.getElementById('sgf-data-hidden').value = sharedPlayer ? sharedPlayer.kifu.toSgf() : '';
+  }
+}
 </script>
 {% endblock %}

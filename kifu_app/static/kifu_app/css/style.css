@@ -736,8 +736,9 @@ button.wgo-button {
   align-items: center;
 }
 .preview-board {
-  width: 260px;
-  height: 260px;
+  width: 100%;
+  max-width: 360px;
+  aspect-ratio: 1;
 }
 .preview-controls {
   display: flex;
