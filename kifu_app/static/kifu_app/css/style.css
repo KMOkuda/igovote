@@ -548,17 +548,25 @@ button.wgo-button {
   border-radius: 14px;
   cursor: pointer;
 }
+.tag-suggestion.selected {
+  background: #000;
+  color: #fff;
+}
 .search-bar-wrapper {
   position: relative;
   width: 100%;
 }
-.search-bar-wrapper i {
+.search-submit-btn {
   position: absolute;
-  left: 14px;
+  right: 8px;
   top: 50%;
   transform: translateY(-50%);
+  background: none;
+  border: none;
   color: #666;
   font-size: 14px;
+  cursor: pointer;
+  padding: 6px;
 }
 .search-input {
   width: 100%;
@@ -566,7 +574,7 @@ button.wgo-button {
   background: #fff;
   border: none;
   border-radius: 8px;
-  padding: 0 12px 0 38px;
+  padding: 0 38px 0 12px;
   font-size: 14px;
   color: #000;
   outline: none;
@@ -717,6 +725,7 @@ button.wgo-button {
   display: block;
 }
 .create-board-controls {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -725,24 +734,15 @@ button.wgo-button {
   font-size: 13px;
   font-weight: bold;
 }
-.board-wrapper {
-  position: relative;
+.create-board-wrapper {
   width: 100%;
   max-width: 360px;
 }
 .board-clear-btn {
   position: absolute;
-  bottom: 8px;
-  right: 8px;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  border: 1px solid #ddd;
-  background: #fff;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 /* ハイライト局面プレビュー */

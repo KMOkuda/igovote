@@ -33,19 +33,19 @@
     </div>
 
     <div class="form-group">
-      <label class="form-label">SGFデータ <span class="required">*</span></label>
+      <label class="form-label">棋譜 <span class="required">*</span></label>
 
       <div class="input-tabs">
-        <div class="input-tab active" id="tab-btn-paste" onclick="switchInputTab(0)">SGFを貼り付け</div>
-        <div class="input-tab" id="tab-btn-board" onclick="switchInputTab(1)">盤面に着手</div>
+        <div class="input-tab active" id="tab-btn-board" onclick="switchInputTab(0)">新しく作る</div>
+        <div class="input-tab" id="tab-btn-paste" onclick="switchInputTab(1)">SGFを貼り付け</div>
       </div>
 
-      <div id="input-tab-paste" class="input-tab-content active">
-        <textarea id="sgf-textarea" class="form-input form-textarea" placeholder="(;GM[1]FF[4]..."></textarea>
-      </div>
-
-      <div id="input-tab-board" class="input-tab-content">
+      <div id="input-tab-board" class="input-tab-content active">
         <p style="font-size:11px;color:#999;">※ 置き碁（ハンディキャップ設定）には対応していません。置き碁を作る場合は「SGFを貼り付け」を使ってください。</p>
+      </div>
+
+      <div id="input-tab-paste" class="input-tab-content">
+        <textarea id="sgf-textarea" class="form-input form-textarea" placeholder="(;GM[1]FF[4]..."></textarea>
       </div>
 
       <input type="hidden" name="sgf_data" id="sgf-data-hidden">
@@ -54,9 +54,8 @@
     <div class="form-group" id="board-section" style="display:none;">
       <label class="form-label" id="board-section-label">盤面</label>
       <div class="highlight-preview">
-        <div class="board-wrapper">
+        <div class="create-board-wrapper">
           <div id="shared-board" class="preview-board"></div>
-          <button type="button" id="clear-board-btn" class="board-clear-btn" title="クリア" style="display:none;"><i class="fa-solid fa-trash"></i></button>
         </div>
 
         <div id="edit-controls" class="create-board-controls" style="display:none;">
@@ -65,6 +64,7 @@
           <span id="board-turn-label">黒番</span>
           <button type="button" id="edit-next-btn" class="preview-nav-btn" title="一手進む"><i class="fa-solid fa-angle-right"></i></button>
           <button type="button" id="edit-last-btn" class="preview-nav-btn" title="最後へ"><i class="fa-solid fa-angles-right"></i></button>
+          <button type="button" id="clear-board-btn" class="preview-nav-btn board-clear-btn" title="クリア"><i class="fa-solid fa-trash"></i></button>
         </div>
 
         <div id="view-controls" class="preview-controls" style="display:none;">
@@ -236,7 +236,6 @@ function onSharedBoardClick(x, y) {
 
 function setEditMode(editable) {
   document.getElementById('edit-controls').style.display = editable ? 'flex' : 'none';
-  document.getElementById('clear-board-btn').style.display = editable ? 'flex' : 'none';
   document.getElementById('view-controls').style.display = editable ? 'none' : 'flex';
   document.getElementById('board-section-label').textContent = editable ? '盤面に着手' : 'ハイライト局面';
   document.getElementById('highlight-status').style.display = 'none';
@@ -305,25 +304,25 @@ document.getElementById('set-highlight-btn').addEventListener('click', function(
   document.getElementById('highlight-status-num').textContent = m;
 });
 
-// タブ切り替え（SGF貼り付け / 盤面に着手）
+// タブ切り替え（新しく作る / SGFを貼り付け）
 function switchInputTab(index) {
   if (index === currentTabIndex) return;
 
-  // 盤面に着手タブで編集中（未保存）の場合は確認
+  // 「新しく作る」タブで編集中（未保存）の場合は確認
   const editing = document.getElementById('edit-controls').style.display !== 'none';
-  if (currentTabIndex === 1 && editing && sharedPlayer && sharedPlayer.kifuReader.path.m > 0) {
+  if (currentTabIndex === 0 && editing && sharedPlayer && sharedPlayer.kifuReader.path.m > 0) {
     if (!confirm('盤面の内容を保存していません。タブを移動すると内容は失われます。よろしいですか？')) {
       return;
     }
   }
 
   currentTabIndex = index;
-  document.getElementById('tab-btn-paste').classList.toggle('active', index === 0);
-  document.getElementById('tab-btn-board').classList.toggle('active', index === 1);
-  document.getElementById('input-tab-paste').classList.toggle('active', index === 0);
-  document.getElementById('input-tab-board').classList.toggle('active', index === 1);
+  document.getElementById('tab-btn-board').classList.toggle('active', index === 0);
+  document.getElementById('tab-btn-paste').classList.toggle('active', index === 1);
+  document.getElementById('input-tab-board').classList.toggle('active', index === 0);
+  document.getElementById('input-tab-paste').classList.toggle('active', index === 1);
 
-  if (index === 0) {
+  if (index === 1) {
     const sgf = document.getElementById('sgf-textarea').value;
     document.getElementById('sgf-data-hidden').value = sgf;
     if (sgf.trim()) {
@@ -337,5 +336,8 @@ function switchInputTab(index) {
     document.getElementById('sgf-data-hidden').value = sharedPlayer ? sharedPlayer.kifu.toSgf() : '';
   }
 }
+
+// 初期表示は「新しく作る」タブ
+buildSharedBoard("(;GM[1]FF[4]SZ[19])", true);
 </script>
 {% endblock %}

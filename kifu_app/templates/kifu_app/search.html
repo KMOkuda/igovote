@@ -16,14 +16,17 @@
 <div class="bottom search-results">
   <div class="search-bar-section">
     <div class="search-bar-wrapper">
-      <i class="fa-solid fa-magnifying-glass"></i>
       <input type="text" class="search-input" id="search-input"
              value="{{ query }}" placeholder="タイトル・タグ・対局者名で検索...">
+      <button type="button" class="search-submit-btn" id="search-submit-btn" aria-label="検索">
+        <i class="fa-solid fa-magnifying-glass"></i>
+      </button>
     </div>
     {% if popular_tags %}
     <div class="tag-suggestions">
       {% for tag in popular_tags %}
-      <span class="tag-suggestion" onclick="addTagToSearch('{{ tag.name|escapejs }}')">#{{ tag.name }}</span>
+      <span class="tag-suggestion{% if query and '#'|add:tag.name in query %} selected{% endif %}"
+            onclick="toggleTagInSearch('{{ tag.name|escapejs }}', this)">#{{ tag.name }}</span>
       {% endfor %}
     </div>
     {% endif %}
@@ -87,19 +90,29 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 
+function runSearch() {
+  const q = document.getElementById('search-input').value.trim();
+  location.href = '/search/?q=' + encodeURIComponent(q);
+}
+
 document.getElementById('search-input').addEventListener('keydown', function(e) {
-  if (e.key === 'Enter') {
-    location.href = '/search/?q=' + encodeURIComponent(this.value.trim());
-  }
+  if (e.key === 'Enter') runSearch();
 });
 
-function addTagToSearch(tagName) {
+document.getElementById('search-submit-btn').addEventListener('click', runSearch);
+
+function toggleTagInSearch(tagName, el) {
   const input = document.getElementById('search-input');
   const token = '#' + tagName;
-  const tokens = input.value.trim().split(/\s+/).filter(Boolean);
-  if (tokens.includes(token)) return;
-  tokens.push(token);
-  location.href = '/search/?q=' + encodeURIComponent(tokens.join(' '));
+  let tokens = input.value.trim().split(/\s+/).filter(Boolean);
+  if (tokens.includes(token)) {
+    tokens = tokens.filter(t => t !== token);
+    el.classList.remove('selected');
+  } else {
+    tokens.push(token);
+    el.classList.add('selected');
+  }
+  input.value = tokens.join(' ');
 }
 </script>
 {% endblock %}
