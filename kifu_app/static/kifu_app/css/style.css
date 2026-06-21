@@ -690,6 +690,82 @@ button.wgo-button {
   font-family: monospace;
   font-size: 12px;
 }
+
+/* 棋譜作成：入力方法タブ */
+.input-tabs {
+  display: flex;
+  border-bottom: 1px solid #ddd;
+  margin-bottom: 12px;
+}
+.input-tab {
+  flex: 1;
+  text-align: center;
+  padding: 10px;
+  font-size: 13px;
+  font-weight: bold;
+  color: #999;
+  cursor: pointer;
+}
+.input-tab.active {
+  color: #000;
+  border-bottom: 2px solid #000;
+}
+.input-tab-content {
+  display: none;
+}
+.input-tab-content.active {
+  display: block;
+}
+.create-board-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 10px;
+  font-size: 13px;
+  font-weight: bold;
+}
+
+/* ハイライト局面プレビュー */
+.highlight-preview {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.preview-board {
+  width: 260px;
+  height: 260px;
+}
+.preview-controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 10px;
+  font-size: 13px;
+  font-weight: bold;
+}
+.preview-nav-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid #ddd;
+  background: #fff;
+  cursor: pointer;
+}
+.set-highlight-btn {
+  margin-top: 12px;
+  padding: 8px 16px;
+  background: #fff;
+  color: #000;
+  border: 1px solid #000;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: bold;
+  cursor: pointer;
+}
 .form-row {
   display: flex;
   gap: 12px;

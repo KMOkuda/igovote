@@ -47,8 +47,10 @@
   </div>
 
   {% for kifu in kifus %}
+  {{ kifu.sgf_data|json_script:forloop.counter }}
   <div class="post-card" onclick="location.href='{% url 'kifu_app:kifu_detail' kifu.pk %}'">
-    <div class="goban-mini"></div>
+    <div class="goban-mini" id="goban-{{ forloop.counter }}" data-sgf-id="{{ forloop.counter }}"
+         data-highlight="{{ kifu.highlight_move|default_if_none:'' }}"></div>
     <div class="post-info">
       <div>
         <div class="post-header-row" style="margin-bottom:4px;">
@@ -79,4 +81,18 @@
   </div>
   {% endfor %}
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'kifu_app/js/wgo.min.js' %}"></script>
+<script src="{% static 'kifu_app/js/board-render.js' %}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.goban-mini[data-sgf-id]').forEach(function(el) {
+    const sgf = JSON.parse(document.getElementById(el.dataset.sgfId).textContent);
+    const hi = el.dataset.highlight;
+    renderMiniBoard(el.id, sgf, hi === '' ? null : parseInt(hi, 10));
+  });
+});
+</script>
 {% endblock %}

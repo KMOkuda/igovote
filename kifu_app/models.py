@@ -53,6 +53,9 @@ class Kifu(models.Model):
     komi = models.FloatField(null=True, blank=True)
     handicap = models.IntegerField(default=0)
 
+    # 一覧表示用にハイライトする手数（未設定なら最終局面を表示）
+    highlight_move = models.PositiveIntegerField(null=True, blank=True)
+
     tags = models.ManyToManyField(Tag, through='KifuTag', blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

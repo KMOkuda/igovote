@@ -102,6 +102,7 @@ def kifu_create(request):
         sgf_data = request.POST.get('sgf_data', '').strip()
         visibility = request.POST.get('visibility', 'public')
         tag_input = request.POST.get('tags', '')
+        highlight_move = request.POST.get('highlight_move') or None
 
         if title and sgf_data:
             kifu = Kifu.objects.create(
@@ -115,6 +116,7 @@ def kifu_create(request):
                 result=request.POST.get('result', ''),
                 komi=request.POST.get('komi') or None,
                 handicap=request.POST.get('handicap', 0),
+                highlight_move=highlight_move,
             )
             # タグ処理
             for tag_name in [t.strip() for t in tag_input.split(',') if t.strip()]:
