@@ -726,6 +726,8 @@ button.wgo-button {
 }
 .create-board-controls {
   position: relative;
+  width: 100%;
+  max-width: 360px;
   display: flex;
   align-items: center;
   justify-content: center;
