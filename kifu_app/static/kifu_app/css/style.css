@@ -725,6 +725,25 @@ button.wgo-button {
   font-size: 13px;
   font-weight: bold;
 }
+.board-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 360px;
+}
+.board-clear-btn {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid #ddd;
+  background: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
 /* ハイライト局面プレビュー */
 .highlight-preview {

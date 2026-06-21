@@ -54,13 +54,17 @@
     <div class="form-group" id="board-section" style="display:none;">
       <label class="form-label" id="board-section-label">盤面</label>
       <div class="highlight-preview">
-        <div id="shared-board" class="preview-board"></div>
+        <div class="board-wrapper">
+          <div id="shared-board" class="preview-board"></div>
+          <button type="button" id="clear-board-btn" class="board-clear-btn" title="クリア" style="display:none;"><i class="fa-solid fa-trash"></i></button>
+        </div>
 
         <div id="edit-controls" class="create-board-controls" style="display:none;">
+          <button type="button" id="edit-first-btn" class="preview-nav-btn" title="最初へ"><i class="fa-solid fa-angles-left"></i></button>
           <button type="button" id="edit-prev-btn" class="preview-nav-btn" title="一手戻る"><i class="fa-solid fa-angle-left"></i></button>
           <span id="board-turn-label">黒番</span>
           <button type="button" id="edit-next-btn" class="preview-nav-btn" title="一手進む"><i class="fa-solid fa-angle-right"></i></button>
-          <button type="button" id="clear-board-btn" class="preview-nav-btn" title="クリア"><i class="fa-solid fa-trash"></i></button>
+          <button type="button" id="edit-last-btn" class="preview-nav-btn" title="最後へ"><i class="fa-solid fa-angles-right"></i></button>
         </div>
 
         <div id="view-controls" class="preview-controls" style="display:none;">
@@ -232,6 +236,7 @@ function onSharedBoardClick(x, y) {
 
 function setEditMode(editable) {
   document.getElementById('edit-controls').style.display = editable ? 'flex' : 'none';
+  document.getElementById('clear-board-btn').style.display = editable ? 'flex' : 'none';
   document.getElementById('view-controls').style.display = editable ? 'none' : 'flex';
   document.getElementById('board-section-label').textContent = editable ? '盤面に着手' : 'ハイライト局面';
   document.getElementById('highlight-status').style.display = 'none';
@@ -261,6 +266,20 @@ document.getElementById('edit-prev-btn').addEventListener('click', function() {
 document.getElementById('edit-next-btn').addEventListener('click', function() {
   if (!sharedPlayer || sharedPlayer.kifuReader.node.children.length === 0) return;
   sharedPlayer.next();
+  syncSharedBoardToForm();
+  updateTurnLabel();
+});
+
+document.getElementById('edit-first-btn').addEventListener('click', function() {
+  if (!sharedPlayer) return;
+  sharedPlayer.first();
+  syncSharedBoardToForm();
+  updateTurnLabel();
+});
+
+document.getElementById('edit-last-btn').addEventListener('click', function() {
+  if (!sharedPlayer) return;
+  sharedPlayer.last();
   syncSharedBoardToForm();
   updateTurnLabel();
 });
