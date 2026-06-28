@@ -39,6 +39,16 @@
       {% if user.bio %}
       <div style="font-size:13px;color:#666;margin-top:4px;">{{ user.bio }}</div>
       {% endif %}
+      <form method="post" action="{% url 'kifu_app:update_rank' %}" style="margin-top:6px;">
+        {% csrf_token %}
+        <select name="rank" class="form-input" style="font-size:12px;padding:4px 8px;width:auto;" onchange="this.form.submit()">
+          <option value="" {% if not user.rank %}selected{% endif %}>棋力未設定</option>
+          <option value="beginner" {% if user.rank == 'beginner' %}selected{% endif %}>初心者</option>
+          <option value="kyu" {% if user.rank == 'kyu' %}selected{% endif %}>級位者</option>
+          <option value="dan" {% if user.rank == 'dan' %}selected{% endif %}>段位者</option>
+          <option value="pro" {% if user.rank == 'pro' %}selected{% endif %}>プロ</option>
+        </select>
+      </form>
     </div>
   </div>
 

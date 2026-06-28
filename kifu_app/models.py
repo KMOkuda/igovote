@@ -4,8 +4,16 @@ from django.contrib.auth.models import AbstractUser
 
 class User(AbstractUser):
     """カスタムユーザー"""
+
+    class Rank(models.TextChoices):
+        BEGINNER = 'beginner', '初心者'
+        KYU = 'kyu', '級位者'
+        DAN = 'dan', '段位者'
+        PRO = 'pro', 'プロ'
+
     avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
     bio = models.TextField(blank=True, default='')
+    rank = models.CharField(max_length=20, choices=Rank.choices, blank=True, default='')
 
     class Meta:
         verbose_name = 'ユーザー'
@@ -48,6 +56,8 @@ class Kifu(models.Model):
     # 対局情報（SGFから自動抽出 or 手入力）
     black_player = models.CharField(max_length=100, blank=True, default='')
     white_player = models.CharField(max_length=100, blank=True, default='')
+    black_rank = models.CharField(max_length=20, choices=User.Rank.choices, blank=True, default='')
+    white_rank = models.CharField(max_length=20, choices=User.Rank.choices, blank=True, default='')
     result = models.CharField(max_length=50, blank=True, default='')
     komi = models.FloatField(null=True, blank=True)
     handicap = models.IntegerField(default=0)

@@ -5,7 +5,7 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.db.models import Q, Count
 
-from .models import Kifu, Comment, Tag, KifuLike, CommentLike
+from .models import Kifu, Comment, Tag, KifuLike, CommentLike, User
 
 
 # ------------------------------------------------------------------ #
@@ -112,6 +112,8 @@ def kifu_create(request):
                 visibility=visibility,
                 black_player=request.POST.get('black_player', ''),
                 white_player=request.POST.get('white_player', ''),
+                black_rank=request.POST.get('black_rank', ''),
+                white_rank=request.POST.get('white_rank', ''),
                 result=request.POST.get('result', ''),
                 komi=request.POST.get('komi') or None,
                 handicap=request.POST.get('handicap', 0),
@@ -170,6 +172,17 @@ def update_avatar(request):
     return redirect('kifu_app:mypage')
 
 
+@login_required
+@require_POST
+def update_rank(request):
+    """棋力の更新"""
+    rank = request.POST.get('rank', '')
+    if rank in dict(User.Rank.choices) or rank == '':
+        request.user.rank = rank
+        request.user.save(update_fields=['rank'])
+    return redirect('kifu_app:mypage')
+
+
 # ------------------------------------------------------------------ #
 # API（Ajax）
 # ------------------------------------------------------------------ #
@@ -182,6 +195,7 @@ def api_comments(request, kifu_id):
         {
             'id': c.pk,
             'user': c.user.username,
+            'rank': c.user.get_rank_display(),
             'avatar': c.user.avatar.url if c.user.avatar else None,
             'move_number': c.move_number,
             'body': c.body,
@@ -217,6 +231,7 @@ def api_comment_post(request, kifu_id):
     return JsonResponse({
         'id': comment.pk,
         'user': comment.user.username,
+        'rank': comment.user.get_rank_display(),
         'move_number': comment.move_number,
         'body': comment.body,
         'like_count': 0,

@@ -16,6 +16,7 @@ urlpatterns = [
     path('kifu/<int:kifu_id>/visibility/', views.kifu_visibility, name='kifu_visibility'),
     path('mypage/', views.mypage, name='mypage'),
     path('mypage/avatar/', views.update_avatar, name='update_avatar'),
+    path('mypage/rank/', views.update_rank, name='update_rank'),
 
     # API（Ajax）
     path('api/kifu/<int:kifu_id>/comments/', views.api_comments, name='api_comments'),

@@ -60,7 +60,7 @@
           {% endif %}
         </div>
         <div class="comment-content">
-          <div class="name">{{ comment.user.username }}</div>
+          <div class="name">{{ comment.user.username }}{% if comment.user.rank %}<span class="rank-badge">{{ comment.user.get_rank_display }}</span>{% endif %}</div>
           <div class="text">
             {% if comment.move_number %}
             <span class="move-chip" onclick="goToMove({{ comment.move_number }})">@{{ comment.move_number }}</span>
@@ -95,11 +95,11 @@
     <div class="info-list">
       <div class="info-row">
         <span class="info-label">黒</span>
-        <span class="info-value">{{ kifu.black_player|default:"-" }}</span>
+        <span class="info-value">{{ kifu.black_player|default:"-" }}{% if kifu.black_rank %}<span class="rank-badge">{{ kifu.get_black_rank_display }}</span>{% endif %}</span>
       </div>
       <div class="info-row">
         <span class="info-label">白</span>
-        <span class="info-value">{{ kifu.white_player|default:"-" }}</span>
+        <span class="info-value">{{ kifu.white_player|default:"-" }}{% if kifu.white_rank %}<span class="rank-badge">{{ kifu.get_white_rank_display }}</span>{% endif %}</span>
       </div>
       <div class="info-row">
         <span class="info-label">コミ</span>
@@ -238,7 +238,7 @@ document.getElementById('send-btn')?.addEventListener('click', function() {
     div.innerHTML = `
       <div class="avatar"></div>
       <div class="comment-content">
-        <div class="name">${data.user}</div>
+        <div class="name">${data.user}${data.rank ? `<span class="rank-badge">${data.rank}</span>` : ''}</div>
         <div class="text">
           ${data.move_number ? `<span class="move-chip" onclick="goToMove(${data.move_number})">@${data.move_number}</span>` : ''}
           ${data.body}
