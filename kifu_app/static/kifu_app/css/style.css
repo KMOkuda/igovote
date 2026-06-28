@@ -76,6 +76,33 @@ textarea {
   word-break: break-all;
 }
 
+/* ドットマトリクス風タイトル */
+.dot-text {
+  display: flex;
+  gap: 4px;
+}
+.dot-char {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.dot-row {
+  display: flex;
+  gap: 1px;
+}
+.dot {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.dot-on {
+  background: #fff;
+}
+.dot-off {
+  background: #000;
+}
+
 /* 右：対局者 */
 .header-right {
   flex: 1;

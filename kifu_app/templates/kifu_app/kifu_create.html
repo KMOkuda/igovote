@@ -10,7 +10,7 @@
     <div class="back" onclick="history.back()"><i class="fa-solid fa-angle-left"></i></div>
   </div>
   <div class="header-center">
-    <div class="title-main">棋譜を投稿</div>
+    <div class="title-main dot-text-container" data-text="POST"></div>
   </div>
   <div class="header-right"></div>
 </div>
@@ -169,6 +169,7 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="{% static 'kifu_app/js/dot-text.js' %}"></script>
 <script src="{% static 'kifu_app/js/wgo.min.js' %}"></script>
 <script src="{% static 'kifu_app/js/wgo.player.min.js' %}"></script>
 <script>
