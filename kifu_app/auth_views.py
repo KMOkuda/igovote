@@ -83,7 +83,7 @@ def send_verification_email(request, user):
     verify_url = request.build_absolute_uri(verify_path)
 
     send_mail(
-        subject='【囲碁SNS】メールアドレスの確認',
+        subject='【碁友会】メールアドレスの確認',
         message=(
             f'{user.username} 様\n\n'
             'ご登録ありがとうございます。以下のリンクをクリックして、登録を完了してください。\n\n'

@@ -1,14 +1,14 @@
 {% extends 'kifu_app/base.html' %}
 {% load static %}
 
-{% block title %}ホーム | 囲碁SNS{% endblock %}
+{% block title %}ホーム | 碁友会{% endblock %}
 {% block nav_home %}nav-active{% endblock %}
 
 {% block app_content %}
 <div class="header">
   <div class="header-left"></div>
   <div class="header-center">
-    <div class="title-main">囲碁SNS</div>
+    <div class="title-main">碁友会</div>
   </div>
   <div class="header-right">
     {% if user.is_authenticated %}
