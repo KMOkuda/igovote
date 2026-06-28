@@ -49,8 +49,8 @@ window.toggleInput = function(show) {
         nav.style.display = "none";
         body.classList.add("is-typing");
         
-        // 取得した手数を即座に反映
-        inputField.value = `@${currentMove} `;
+        // 取得した手数を即座に反映（0手目は@をつけない）
+        inputField.value = currentMove > 0 ? `@${currentMove} ` : '';
         
         setTimeout(() => {
             inputField.focus();
