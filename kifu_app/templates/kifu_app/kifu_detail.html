@@ -62,7 +62,9 @@
         <div class="comment-content">
           <div class="name">{{ comment.user.username }}</div>
           <div class="text">
-            <span class="move-chip" onclick="goToMove({{ comment.move_number }})">@ {{ comment.move_number }}</span>
+            {% if comment.move_number %}
+            <span class="move-chip" onclick="goToMove({{ comment.move_number }})">@{{ comment.move_number }}</span>
+            {% endif %}
             {{ comment.body }}
           </div>
         </div>
@@ -72,6 +74,9 @@
           <i class="fa-{% if comment.pk in liked_comment_ids %}solid{% else %}regular{% endif %} fa-heart"></i>
           <span>{{ comment.like_count }}</span>
         </div>
+        {% if comment.user == request.user or kifu.user == request.user %}
+        <i class="fa-solid fa-trash comment-delete-btn" onclick="deleteComment({{ comment.pk }}, this)"></i>
+        {% endif %}
       </div>
       {% empty %}
       <div id="no-comment-msg" style="text-align:center;padding:40px 20px;color:#999;font-size:13px;">
@@ -88,10 +93,6 @@
 
   <div class="tab-content">
     <div class="info-list">
-      <div class="info-row">
-        <span class="info-label">対局名</span>
-        <span class="info-value">{{ kifu.event_name|default:"-" }}</span>
-      </div>
       <div class="info-row">
         <span class="info-label">黒</span>
         <span class="info-value">{{ kifu.black_player|default:"-" }}</span>
@@ -174,6 +175,18 @@ function toggleCommentLike(el, commentId) {
   });
 }
 
+// コメント削除
+function deleteComment(commentId, el) {
+  if (!confirm('このコメントを削除しますか？')) return;
+  fetch(`/api/comment/${commentId}/delete/`, {
+    method: 'POST',
+    headers: {'X-CSRFToken': getCookie('csrftoken')},
+  })
+  .then(r => {
+    if (r.ok) el.closest('.comment').remove();
+  });
+}
+
 // 公開範囲切替
 function toggleVisibility() {
   const current = '{{ kifu.visibility }}';
@@ -202,9 +215,9 @@ function deleteKifu() {
 document.getElementById('send-btn')?.addEventListener('click', function() {
   const input = document.getElementById('comment-input');
   const text = input.value;
-  const match = text.match(/^@ (\d+) /);
+  const match = text.match(/^@(\d+) /);
   const moveNum = match ? parseInt(match[1]) : 0;
-  const body = match ? text.replace(/^@ \d+ /, '').trim() : text.trim();
+  const body = match ? text.replace(/^@\d+ /, '').trim() : text.trim();
   if (!body) return;
 
   fetch(`/api/kifu/${KIFU_ID}/comment/`, {
@@ -227,13 +240,14 @@ document.getElementById('send-btn')?.addEventListener('click', function() {
       <div class="comment-content">
         <div class="name">${data.user}</div>
         <div class="text">
-          <span class="move-chip" onclick="goToMove(${data.move_number})">@ ${data.move_number}</span>
+          ${data.move_number ? `<span class="move-chip" onclick="goToMove(${data.move_number})">@${data.move_number}</span>` : ''}
           ${data.body}
         </div>
       </div>
       <div class="like" data-id="${data.id}" onclick="toggleCommentLike(this, ${data.id})">
         <i class="fa-regular fa-heart"></i><span>0</span>
-      </div>`;
+      </div>
+      <i class="fa-solid fa-trash comment-delete-btn" onclick="deleteComment(${data.id}, this)"></i>`;
     list.appendChild(div);
     input.value = '';
     toggleInput(false);

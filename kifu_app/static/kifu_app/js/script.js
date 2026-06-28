@@ -50,7 +50,7 @@ window.toggleInput = function(show) {
         body.classList.add("is-typing");
         
         // 取得した手数を即座に反映
-        inputField.value = `@ ${currentMove} `;
+        inputField.value = `@${currentMove} `;
         
         setTimeout(() => {
             inputField.focus();
@@ -101,7 +101,7 @@ document.addEventListener("DOMContentLoaded", function() {
             // コメント入力中であれば、先頭の「@ 数字」部分を盤に合わせてリアルタイム更新
             if (document.body.classList.contains("is-typing") && inputField) {
                 const currentText = inputField.value;
-                const newText = currentText.replace(/^@ \d+ /, `@ ${m} `);
+                const newText = currentText.replace(/^@\d+ /, `@${m} `);
                 if (currentText !== newText) {
                     inputField.value = newText;
                 }
@@ -112,7 +112,7 @@ document.addEventListener("DOMContentLoaded", function() {
     // 【連動 B】コメント入力欄の「@ 数字」を書き換えた時、盤をその手数へ飛ばす
     if (inputField) {
         inputField.addEventListener("input", function(e) {
-            const match = e.target.value.match(/^@ (\d+) /);
+            const match = e.target.value.match(/^@(\d+) /);
             if (match && player) {
                 const targetMove = parseInt(match[1]);
                 const currentMove = getCurrentMove();
@@ -178,10 +178,10 @@ window.goToMove = function(moveNum) {
 
     // 1. 入力欄の数字だけをスマートに書き換える
     const currentText = inputField.value;
-    const newPrefix = `@ ${moveNum} `;
-    
-    if (currentText.match(/^@ \d+ /)) {
-        inputField.value = currentText.replace(/^@ \d+ /, newPrefix);
+    const newPrefix = `@${moveNum} `;
+
+    if (currentText.match(/^@\d+ /)) {
+        inputField.value = currentText.replace(/^@\d+ /, newPrefix);
     } else {
         inputField.value = newPrefix + currentText;
     }

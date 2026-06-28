@@ -112,14 +112,13 @@ def kifu_create(request):
                 visibility=visibility,
                 black_player=request.POST.get('black_player', ''),
                 white_player=request.POST.get('white_player', ''),
-                event_name=request.POST.get('event_name', ''),
                 result=request.POST.get('result', ''),
                 komi=request.POST.get('komi') or None,
                 handicap=request.POST.get('handicap', 0),
                 highlight_move=highlight_move,
             )
-            # タグ処理
-            for tag_name in [t.strip() for t in tag_input.split(',') if t.strip()]:
+            # タグ処理（スペース区切り）
+            for tag_name in [t.strip() for t in tag_input.split() if t.strip()]:
                 tag, _ = Tag.objects.get_or_create(name=tag_name)
                 kifu.tags.add(tag)
 
@@ -223,6 +222,17 @@ def api_comment_post(request, kifu_id):
         'like_count': 0,
         'created_at': comment.created_at.strftime('%Y.%m.%d'),
     }, status=201)
+
+
+@login_required
+@require_POST
+def api_comment_delete(request, comment_id):
+    """コメント削除（コメント投稿者または棋譜投稿主のみ）"""
+    comment = get_object_or_404(Comment, pk=comment_id)
+    if request.user != comment.user and request.user != comment.kifu.user:
+        return JsonResponse({'error': 'forbidden'}, status=403)
+    comment.delete()
+    return JsonResponse({'deleted': True})
 
 
 @login_required

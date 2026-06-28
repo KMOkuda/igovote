@@ -48,7 +48,6 @@ class Kifu(models.Model):
     # 対局情報（SGFから自動抽出 or 手入力）
     black_player = models.CharField(max_length=100, blank=True, default='')
     white_player = models.CharField(max_length=100, blank=True, default='')
-    event_name = models.CharField(max_length=200, blank=True, default='')
     result = models.CharField(max_length=50, blank=True, default='')
     komi = models.FloatField(null=True, blank=True)
     handicap = models.IntegerField(default=0)

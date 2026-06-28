@@ -29,7 +29,7 @@
 
     <div class="form-group">
       <label class="form-label">タイトル <span class="required">*</span></label>
-      <input type="text" name="title" class="form-input" placeholder="例：本因坊戦 第5局" required>
+      <input type="text" name="title" class="form-input" placeholder="友人戦" required>
     </div>
 
     <div class="form-group">
@@ -84,17 +84,12 @@
     <div class="form-row">
       <div class="form-group form-half">
         <label class="form-label">黒番</label>
-        <input type="text" name="black_player" class="form-input" placeholder="例：井山裕太">
+        <input type="text" name="black_player" class="form-input" placeholder="黒の棋士">
       </div>
       <div class="form-group form-half">
         <label class="form-label">白番</label>
-        <input type="text" name="white_player" class="form-input" placeholder="例：一力遼">
+        <input type="text" name="white_player" class="form-input" placeholder="白の棋士">
       </div>
-    </div>
-
-    <div class="form-group">
-      <label class="form-label">対局名・棋戦</label>
-      <input type="text" name="event_name" class="form-input" placeholder="例：本因坊戦">
     </div>
 
     <div class="form-row">
@@ -110,7 +105,7 @@
 
     <div class="form-group">
       <label class="form-label">タグ</label>
-      <input type="text" name="tags" class="form-input" placeholder="カンマ区切り: プロ棋譜, 布石, 研究">
+      <input type="text" name="tags" class="form-input" placeholder="布石 研究 初心者">
     </div>
 
     <div class="form-group">
@@ -161,9 +156,6 @@ document.getElementById('sgf-textarea').addEventListener('blur', function() {
   }
   if (!document.querySelector('[name="white_player"]').value) {
     document.querySelector('[name="white_player"]').value = get('PW');
-  }
-  if (!document.querySelector('[name="event_name"]').value) {
-    document.querySelector('[name="event_name"]').value = get('EV');
   }
   if (!document.querySelector('[name="result"]').value) {
     document.querySelector('[name="result"]').value = get('RE');

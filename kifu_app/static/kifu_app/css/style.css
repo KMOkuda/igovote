@@ -233,6 +233,16 @@ textarea {
   color: #888;
 }
 
+.comment-delete-btn {
+  font-size: 12px;
+  color: #ccc;
+  cursor: pointer;
+  align-self: center;
+}
+.comment-delete-btn:hover {
+  color: #c00;
+}
+
 /* ==========================================================================
    6. 対局情報タブ
    ========================================================================== */

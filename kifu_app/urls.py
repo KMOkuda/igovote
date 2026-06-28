@@ -21,6 +21,7 @@ urlpatterns = [
     path('api/kifu/<int:kifu_id>/comments/', views.api_comments, name='api_comments'),
     path('api/kifu/<int:kifu_id>/comment/', views.api_comment_post, name='api_comment_post'),
     path('api/comment/<int:comment_id>/like/', views.api_comment_like, name='api_comment_like'),
+    path('api/comment/<int:comment_id>/delete/', views.api_comment_delete, name='api_comment_delete'),
     path('api/kifu/<int:kifu_id>/like/', views.api_kifu_like, name='api_kifu_like'),
 
     # 認証
