@@ -47,6 +47,7 @@
       </div>
 
       <input type="hidden" name="sgf_data" id="sgf-data-hidden">
+      <input type="hidden" name="handicap" id="handicap-hidden" value="0">
     </div>
 
     <div class="form-group" id="board-section" style="display:none;">
@@ -84,7 +85,7 @@
     <div class="form-row">
       <div class="form-group form-half">
         <label class="form-label">黒番</label>
-        <input type="text" name="black_player" class="form-input" placeholder="黒の棋士">
+        <input type="text" name="black_player" class="form-input" value="黒の棋士">
         <select name="black_rank" class="form-input" style="margin-top:6px;">
           <option value="">棋力未設定</option>
           <option value="beginner">初心者</option>
@@ -95,7 +96,7 @@
       </div>
       <div class="form-group form-half">
         <label class="form-label">白番</label>
-        <input type="text" name="white_player" class="form-input" placeholder="白の棋士">
+        <input type="text" name="white_player" class="form-input" value="白の棋士">
         <select name="white_rank" class="form-input" style="margin-top:6px;">
           <option value="">棋力未設定</option>
           <option value="beginner">初心者</option>
@@ -109,11 +110,37 @@
     <div class="form-row">
       <div class="form-group form-half">
         <label class="form-label">コミ</label>
-        <input type="number" name="komi" class="form-input" placeholder="6.5" step="0.5">
+        <select name="komi" class="form-input">
+          <option value="0">0</option>
+          <option value="0.5">0.5</option>
+          <option value="5.5">5.5</option>
+          <option value="6.5">6.5</option>
+          <option value="7.5" selected>7.5</option>
+        </select>
       </div>
       <div class="form-group form-half">
         <label class="form-label">結果</label>
-        <input type="text" name="result" class="form-input" placeholder="例：黒中押し勝ち">
+        <div style="display:flex;gap:6px;">
+          <select id="result-side" class="form-input" style="flex:1;">
+            <option value="">-</option>
+            <option value="黒">黒</option>
+            <option value="白">白</option>
+          </select>
+          <input type="number" id="result-margin" class="form-input" placeholder="目数差" step="0.5" style="flex:1;">
+        </div>
+        <div style="display:flex;gap:6px;margin-top:6px;">
+          <select id="result-wintype" class="form-input" style="flex:1;">
+            <option value="">-</option>
+            <option value="中押し">中押し</option>
+            <option value="時間切れ">時間切れ</option>
+          </select>
+          <select id="result-outcome" class="form-input" style="flex:1;">
+            <option value="勝ち">勝ち</option>
+            <option value="持碁">持碁</option>
+            <option value="負け" id="result-outcome-lose" disabled>負け</option>
+          </select>
+        </div>
+        <input type="hidden" name="result" id="result-hidden">
       </div>
     </div>
 
@@ -152,6 +179,45 @@ document.getElementById('create-form').addEventListener('submit', function(e) {
   }
 });
 
+// 結果入力の組み立て
+function updateResultHidden() {
+  const side = document.getElementById('result-side').value;
+  const margin = document.getElementById('result-margin').value;
+  const winType = document.getElementById('result-wintype').value;
+  const outcomeSelect = document.getElementById('result-outcome');
+  const loseOption = document.getElementById('result-outcome-lose');
+
+  loseOption.disabled = (winType !== '時間切れ');
+  if (loseOption.disabled && outcomeSelect.value === '負け') {
+    outcomeSelect.value = '勝ち';
+  }
+  const outcome = outcomeSelect.value;
+
+  let result = '';
+  if (outcome === '持碁') {
+    result = '持碁';
+  } else {
+    const parts = [];
+    if (side) parts.push(side);
+    if (winType === '時間切れ') {
+      parts.push('時間切れ');
+    } else if (margin) {
+      parts.push(margin + '目');
+    } else if (winType === '中押し') {
+      parts.push('中押し');
+    }
+    parts.push(outcome);
+    result = parts.join('');
+  }
+  document.getElementById('result-hidden').value = result;
+}
+['result-side', 'result-margin', 'result-wintype', 'result-outcome'].forEach(function(id) {
+  const el = document.getElementById(id);
+  el.addEventListener('change', updateResultHidden);
+  el.addEventListener('input', updateResultHidden);
+});
+updateResultHidden();
+
 // SGF自動パース（タイトル・対局者を補完）
 document.getElementById('sgf-textarea').addEventListener('input', function() {
   document.getElementById('sgf-data-hidden').value = this.value;
@@ -165,17 +231,23 @@ document.getElementById('sgf-textarea').addEventListener('blur', function() {
     const m = sgf.match(new RegExp(tag + '\\[([^\\]]+)\\]'));
     return m ? m[1] : '';
   };
-  if (!document.querySelector('[name="black_player"]').value) {
-    document.querySelector('[name="black_player"]').value = get('PB');
+  const blackInput = document.querySelector('[name="black_player"]');
+  if ((blackInput.value === '' || blackInput.value === '黒の棋士') && get('PB')) {
+    blackInput.value = get('PB');
   }
-  if (!document.querySelector('[name="white_player"]').value) {
-    document.querySelector('[name="white_player"]').value = get('PW');
+  const whiteInput = document.querySelector('[name="white_player"]');
+  if ((whiteInput.value === '' || whiteInput.value === '白の棋士') && get('PW')) {
+    whiteInput.value = get('PW');
   }
   if (!document.querySelector('[name="result"]').value) {
     document.querySelector('[name="result"]').value = get('RE');
   }
   if (!document.querySelector('[name="komi"]').value) {
     document.querySelector('[name="komi"]').value = get('KM');
+  }
+  const ha = get('HA');
+  if (ha) {
+    document.getElementById('handicap-hidden').value = ha;
   }
 
   if (sgf.trim()) {

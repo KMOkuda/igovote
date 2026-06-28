@@ -105,6 +105,11 @@ def kifu_create(request):
         highlight_move = request.POST.get('highlight_move') or None
 
         if title and sgf_data:
+            try:
+                handicap = int(request.POST.get('handicap') or 0)
+            except ValueError:
+                handicap = 0
+
             kifu = Kifu.objects.create(
                 user=request.user,
                 title=title,
@@ -116,13 +121,19 @@ def kifu_create(request):
                 white_rank=request.POST.get('white_rank', ''),
                 result=request.POST.get('result', ''),
                 komi=request.POST.get('komi') or None,
-                handicap=request.POST.get('handicap', 0),
+                handicap=handicap,
                 highlight_move=highlight_move,
             )
             # タグ処理（スペース区切り）
             for tag_name in [t.strip() for t in tag_input.split() if t.strip()]:
                 tag, _ = Tag.objects.get_or_create(name=tag_name)
                 kifu.tags.add(tag)
+
+            # 置き碁の場合はタグを自動付与
+            if handicap > 0:
+                for auto_tag_name in ['置き碁', f'{handicap}子局']:
+                    auto_tag, _ = Tag.objects.get_or_create(name=auto_tag_name)
+                    kifu.tags.add(auto_tag)
 
             return redirect('kifu_app:kifu_detail', kifu_id=kifu.pk)
 
